@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'self';"
+    />
+    <title>RavenQuest Companion</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="loadingOverlay" class="loading-overlay" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="loading-text">Loading data...</div>
+    </div>
+    <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+    <div class="app">
+      <div class="top-nav drag-region" role="tablist" aria-label="Primary Tabs">
+        <button
+          id="trophies-tab"
+          class="tab-button active"
+          role="tab"
+          aria-selected="true"
+          aria-controls="tab-trophies"
+          data-tab="trophies"
+        >
+          Trophies
+        </button>
+        <button
+          id="cosmetics-tab"
+          class="tab-button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="tab-cosmetics"
+          data-tab="cosmetics"
+        >
+          Cosmetics
+        </button>
+        <div class="spacer"></div>
+        <div class="opacity-control no-drag" aria-label="Overlay opacity">
+          <label for="opacitySlider">Opacity</label>
+          <input id="opacitySlider" type="range" min="20" max="100" value="90" />
+        </div>
+      </div>
+
+      <div class="dashboard-header" aria-label="Collection summary">
+        <div class="stat-group">
+          <div class="stat">
+            <span class="stat-label">Trophies</span>
+            <span class="stat-value" id="trophyProgress">0%</span>
+            <span class="stat-detail" id="trophyCount">0/0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Cosmetics</span>
+            <span class="stat-value" id="cosmeticProgress">0%</span>
+            <span class="stat-detail" id="cosmeticCount">0/0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Total Renown</span>
+            <span class="stat-value" id="renownTotal">0</span>
+          </div>
+        </div>
+      </div>
+
+      <section
+        id="tab-trophies"
+        class="tab-section active"
+        role="tabpanel"
+        aria-labelledby="trophies-tab"
+      >
+        <div class="container">
+          <div class="trophy-list">
+            <h1>Trophy Collection</h1>
+            <div class="toolbar">
+              <button id="reloadDataBtn" class="primary-btn">Reload Data</button>
+            </div>
+
+            <div class="trophy-sub-tabs" role="tablist" aria-label="Trophy Types">
+              <button
+                class="trophy-sub-tab active"
+                role="tab"
+                aria-selected="true"
+                data-trophy-type="Creature Trophies"
+              >
+                Creature
+              </button>
+              <button
+                class="trophy-sub-tab"
+                role="tab"
+                aria-selected="false"
+                data-trophy-type="Ocean Trophies"
+              >
+                Ocean
+              </button>
+              <button
+                class="trophy-sub-tab"
+                role="tab"
+                aria-selected="false"
+                data-trophy-type="Carnival Trophies"
+              >
+                Carnival
+              </button>
+              <button
+                class="trophy-sub-tab"
+                role="tab"
+                aria-selected="false"
+                data-trophy-type="Monuments"
+              >
+                Monuments
+              </button>
+            </div>
+
+            <div class="filters">
+              <div class="filter-group">
+                <label for="trophySearch">Search:</label>
+                <input
+                  id="trophySearch"
+                  type="text"
+                  placeholder="Search trophy name..."
+                  aria-label="Search trophy name"
+                />
+              </div>
+              <div class="filter-group">
+                <label for="statusFilter">Collection Status:</label>
+                <select id="statusFilter" aria-label="Filter by collection status">
+                  <option value="">All</option>
+                  <option value="all-tiers">All Tiers</option>
+                  <option value="partial">Partial</option>
+                  <option value="base-only">Base Only</option>
+                  <option value="none">Not Collected</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="tierFilter">Trophy Tier:</label>
+                <select id="tierFilter" aria-label="Filter by trophy tier">
+                  <option value="">All Tiers</option>
+                  <option value="Base">Base</option>
+                  <option value="Golden">Golden</option>
+                  <option value="Enchanted">Enchanted</option>
+                </select>
+              </div>
+              <div class="filter-group" id="categoryFilterGroup">
+                <label for="categoryFilter">Monster Category:</label>
+                <select id="categoryFilter" aria-label="Filter by monster category">
+                  <option value="">All Categories</option>
+                  <option value="Humans">Humans</option>
+                  <option value="Humanoids">Humanoids</option>
+                  <option value="Naturals">Naturals</option>
+                  <option value="Mutants">Mutants</option>
+                  <option value="Outsiders">Outsiders</option>
+                  <option value="Undead">Undead</option>
+                  <option value="Coming Soon">Coming Soon</option>
+                </select>
+              </div>
+            </div>
+            <div id="trophyListContainer" class="trophy-items"></div>
+          </div>
+          <div class="stat-panel">
+            <h2>Trophy Stats</h2>
+            <div class="tier-totals">
+              <h3>Collection Progress</h3>
+              <div class="tier-count">
+                <span class="tier-label base">Base:</span>
+                <span id="baseCount">0/46</span>
+              </div>
+              <div class="tier-count">
+                <span class="tier-label golden">Golden:</span>
+                <span id="goldenCount">0/46</span>
+              </div>
+              <div class="tier-count">
+                <span class="tier-label enchanted">Enchanted:</span>
+                <span id="enchantedCount">0/46</span>
+              </div>
+            </div>
+            <div class="rewards-totals">
+              <h3>Rewards</h3>
+              <div class="reward-row">
+                <span class="reward-label">Renown Gained:</span>
+                <span id="totalRenown">0</span>
+              </div>
+              <div class="reward-row">
+                <span class="reward-label">Silver Spent:</span>
+                <span id="totalSilver">0</span>
+              </div>
+            </div>
+            <div class="stat-bonuses">
+              <h3>Total Stat Bonuses</h3>
+              <div id="statBonusContainer"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="tab-cosmetics"
+        class="tab-section"
+        role="tabpanel"
+        aria-labelledby="cosmetics-tab"
+      >
+        <div class="container cosmetics-container">
+          <div class="cosmetics-list">
+            <h1>Cosmetics</h1>
+
+            <div class="cosmetic-tabs" role="tablist" aria-label="Cosmetic Categories">
+              <!-- Dynamically populated by JavaScript -->
+            </div>
+
+            <div class="filters">
+              <div class="filter-group">
+                <label for="cosmeticSearch">Search:</label>
+                <input
+                  id="cosmeticSearch"
+                  type="text"
+                  placeholder="Name contains..."
+                  aria-label="Search cosmetic name"
+                />
+              </div>
+              <div class="filter-group" id="cosmeticLevel2Group" style="display: none">
+                <label for="cosmeticLevel2">Sub-Category:</label>
+                <select id="cosmeticLevel2" aria-label="Filter by sub-category">
+                  <option value="">All</option>
+                </select>
+              </div>
+              <div class="filter-group">
+                <label for="cosmeticLocation">Location:</label>
+                <select id="cosmeticLocation" aria-label="Filter by cosmetic location">
+                  <option value="">All Locations</option>
+                  <option value="Quest">Quest Drop</option>
+                  <option value="Mission">Mission Drop</option>
+                  <option value="Ocean">Ocean Drop</option>
+                  <option value="Craft">Craftable</option>
+                  <option value="Market">Market</option>
+                  <option value="Event">Event</option>
+                </select>
+              </div>
+            </div>
+            <div id="cosmeticsListContainer" class="cosmetic-items"></div>
+          </div>
+          <div class="stat-panel cosmetics-panel">
+            <h2>Cosmetic Progress</h2>
+            <div class="tier-totals">
+              <h3>Collection</h3>
+              <div class="tier-count">
+                <span class="tier-label base">Collected:</span>
+                <span id="cosmeticCollectedCount">0/0</span>
+              </div>
+            </div>
+            <div class="rewards-totals">
+              <h3>Renown</h3>
+              <div class="reward-row">
+                <span class="reward-label">Total Renown:</span>
+                <span id="cosmeticRenownTotal">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script src="tabs.js"></script>
+    <script src="trophies.js"></script>
+    <script src="cosmetics.js"></script>
+  </body>
+</html>
