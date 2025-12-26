@@ -1,3 +1,97 @@
+/* ============================================
+   CSS Custom Properties (Design System)
+   ============================================ */
+:root {
+  /* Primary Colors - Royal Purple */
+  --color-primary: #6B46C1;
+  --color-primary-light: #9B7ED9;
+  --color-primary-dark: #4C3290;
+
+  /* Accent Colors - Gold */
+  --color-accent: #D4A017;
+  --color-accent-light: #F4C430;
+  --color-gold: #ffd700;
+
+  /* Background Colors */
+  --bg-dark: #1e1e2e;
+  --bg-darker: #15151f;
+  --bg-medium: #2d2d44;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --bg-card-hover: rgba(255, 255, 255, 0.08);
+  --bg-overlay: rgba(0, 0, 0, 0.35);
+  --bg-overlay-dark: rgba(0, 0, 0, 0.4);
+
+  /* Text Colors */
+  --text-primary: #f0f0f0;
+  --text-secondary: #e0e0e0;
+  --text-muted: #b0b0b0;
+  --text-dim: #a0a0a0;
+  --text-disabled: #808080;
+
+  /* Border Colors */
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-light: rgba(255, 255, 255, 0.2);
+  --border-gold: rgba(212, 160, 23, 0.3);
+  --border-gold-bright: rgba(255, 215, 0, 0.5);
+
+  /* Trophy Tier Colors */
+  --tier-base: #c0c0c0;
+  --tier-golden: #ffd700;
+  --tier-enchanted: #9b59b6;
+
+  /* Status Colors */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Border Radius */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+
+  /* Font Sizes */
+  --font-xs: 11px;
+  --font-sm: 12px;
+  --font-base: 14px;
+  --font-md: 16px;
+  --font-lg: 20px;
+  --font-xl: 24px;
+  --font-2xl: 28px;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.2s ease;
+  --transition-slow: 0.3s ease;
+
+  /* Shadows */
+  --shadow-text: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 10px rgba(212, 160, 23, 0.3);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+   Reset & Base Styles
+   ============================================ */
 * {
   margin: 0;
   padding: 0;
@@ -6,8 +100,8 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
-  color: #e0e0e0;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-medium) 100%);
+  color: var(--text-secondary);
   height: 100vh;
   overflow: hidden;
 }
@@ -18,25 +112,28 @@ body {
   flex-direction: column;
 }
 
+/* ============================================
+   Navigation
+   ============================================ */
 .top-nav {
   display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.35);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-overlay);
+  border-bottom: 1px solid var(--border-subtle);
   -webkit-app-region: drag;
 }
 
 .tab-button {
   padding: 10px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.05);
-  color: #e0e0e0;
-  border-radius: 6px;
+  border: 1px solid var(--border-light);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-weight: 600;
   letter-spacing: 0.3px;
-  transition: all 0.2s ease;
+  transition: all var(--transition-normal);
   -webkit-app-region: no-drag;
 }
 
@@ -51,58 +148,64 @@ body {
 .opacity-control {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #e0e0e0;
-  font-size: 12px;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--font-sm);
 }
 
 .opacity-control input[type='range'] {
   width: 140px;
 }
 
+/* ============================================
+   Dashboard Header
+   ============================================ */
 .dashboard-header {
-  background: rgba(0, 0, 0, 0.4);
-  border-bottom: 1px solid rgba(212, 160, 23, 0.3);
-  padding: 16px;
+  background: var(--bg-overlay-dark);
+  border-bottom: 1px solid var(--border-gold);
+  padding: var(--space-4);
   display: flex;
-  gap: 32px;
+  gap: var(--space-8);
 }
 
 .stat-group {
   display: flex;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 140px;
 }
 
 .stat-label {
-  font-size: 12px;
-  color: #a0a0a0;
+  font-size: var(--font-sm);
+  color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
 
 .stat-value {
-  font-size: 20px;
+  font-size: var(--font-lg);
   font-weight: bold;
-  color: #d4a017;
+  color: var(--color-accent);
 }
 
 .stat-detail {
   font-size: 13px;
-  color: #b0b0b0;
+  color: var(--text-muted);
 }
 
+/* ============================================
+   Tab States
+   ============================================ */
 .tab-button.active {
   background: rgba(255, 215, 0, 0.15);
-  border-color: #ffd700;
-  color: #ffd700;
+  border-color: var(--color-gold);
+  color: var(--color-gold);
 }
 
 .tab-button:focus-visible,
@@ -111,7 +214,7 @@ body {
 select:focus-visible,
 input:focus-visible,
 button:focus-visible {
-  outline: 2px solid #ffd700;
+  outline: 2px solid var(--color-gold);
   outline-offset: 2px;
 }
 
@@ -124,6 +227,9 @@ button:focus-visible {
   display: block;
 }
 
+/* ============================================
+   Layout
+   ============================================ */
 .container {
   display: flex;
   height: calc(100vh - 58px);
@@ -131,15 +237,15 @@ button:focus-visible {
 
 .trophy-list {
   flex: 0 0 65%;
-  padding: 20px;
+  padding: var(--space-5);
   overflow-y: auto;
 }
 
 .trophy-list h1 {
-  font-size: 28px;
-  margin-bottom: 20px;
-  color: #ffd700;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  font-size: var(--font-2xl);
+  margin-bottom: var(--space-5);
+  color: var(--color-gold);
+  text-shadow: var(--shadow-text);
 }
 
 .toolbar {
@@ -150,16 +256,16 @@ button:focus-visible {
 }
 
 .primary-btn {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: var(--space-2) 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
   background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.15));
-  color: #1e1e2e;
+  color: var(--bg-dark);
   font-weight: 700;
   cursor: pointer;
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast);
 }
 
 .primary-btn:hover {
@@ -167,61 +273,67 @@ button:focus-visible {
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
+/* ============================================
+   Trophy Sub-Tabs
+   ============================================ */
 .trophy-sub-tabs {
   display: flex;
-  gap: 8px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-4);
+  border-bottom: 2px solid var(--border-subtle);
 }
 
 .trophy-sub-tab {
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-2) var(--space-4);
+  background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  color: #b0b0b0;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--font-base);
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .trophy-sub-tab:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-card-hover);
   border-color: rgba(255, 255, 255, 0.25);
 }
 
 .trophy-sub-tab.active {
   background: rgba(255, 215, 0, 0.15);
-  border-color: #ffd700;
-  color: #ffd700;
+  border-color: var(--color-gold);
+  color: var(--color-gold);
 }
 
+/* ============================================
+   Cosmetic Tabs
+   ============================================ */
 .cosmetic-tabs {
   display: flex;
-  gap: 8px;
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: var(--space-2);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-subtle);
   overflow-x: auto;
 }
 
 .cosmetic-tab {
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.05);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-card);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 6px;
-  color: #b0b0b0;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
   white-space: nowrap;
   -webkit-app-region: no-drag;
 }
 
 .cosmetic-tab:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--bg-card-hover);
   border-color: rgba(255, 255, 255, 0.25);
 }
 
@@ -371,15 +483,15 @@ button:focus-visible {
 }
 
 .checkbox-label.base {
-  color: #c0c0c0;
+  color: var(--tier-base);
 }
 
 .checkbox-label.enchanted {
-  color: #9b59b6;
+  color: var(--tier-enchanted);
 }
 
 .checkbox-label.golden {
-  color: #ffd700;
+  color: var(--tier-golden);
 }
 
 .trophy-checkbox {
@@ -388,36 +500,36 @@ button:focus-visible {
   cursor: pointer;
   appearance: none;
   border: 2px solid;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   position: relative;
-  transition: all 0.2s;
+  transition: all var(--transition-normal);
 }
 
 .trophy-checkbox.base {
-  border-color: #c0c0c0;
+  border-color: var(--tier-base);
 }
 
 .trophy-checkbox.base:checked {
-  background-color: #c0c0c0;
-  border-color: #c0c0c0;
+  background-color: var(--tier-base);
+  border-color: var(--tier-base);
 }
 
 .trophy-checkbox.enchanted {
-  border-color: #9b59b6;
+  border-color: var(--tier-enchanted);
 }
 
 .trophy-checkbox.enchanted:checked {
-  background-color: #9b59b6;
-  border-color: #9b59b6;
+  background-color: var(--tier-enchanted);
+  border-color: var(--tier-enchanted);
 }
 
 .trophy-checkbox.golden {
-  border-color: #ffd700;
+  border-color: var(--tier-golden);
 }
 
 .trophy-checkbox.golden:checked {
-  background-color: #ffd700;
-  border-color: #ffd700;
+  background-color: var(--tier-golden);
+  border-color: var(--tier-golden);
 }
 
 .trophy-checkbox:checked::after {
@@ -426,32 +538,35 @@ button:focus-visible {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  color: #1e1e2e;
-  font-size: 16px;
+  color: var(--bg-dark);
+  font-size: var(--font-md);
   font-weight: bold;
 }
 
+/* ============================================
+   Stat Panel
+   ============================================ */
 .stat-panel {
   flex: 0 0 35%;
   background: rgba(0, 0, 0, 0.3);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 20px;
+  border-left: 1px solid var(--border-subtle);
+  padding: var(--space-5);
   overflow-y: auto;
 }
 
 .stat-panel h2 {
   font-size: 22px;
-  margin-bottom: 24px;
-  color: #ffd700;
+  margin-bottom: var(--space-6);
+  color: var(--color-gold);
   text-align: center;
 }
 
 .stat-panel h3 {
-  font-size: 16px;
-  margin-bottom: 12px;
-  color: #e0e0e0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 8px;
+  font-size: var(--font-md);
+  margin-bottom: var(--space-3);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--space-2);
 }
 
 .tier-totals {
@@ -462,26 +577,26 @@ button:focus-visible {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: var(--space-2) 0;
+  font-size: var(--font-base);
 }
 
 .tier-label {
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 12px;
+  font-size: var(--font-sm);
 }
 
 .tier-label.base {
-  color: #c0c0c0;
+  color: var(--tier-base);
 }
 
 .tier-label.enchanted {
-  color: #9b59b6;
+  color: var(--tier-enchanted);
 }
 
 .tier-label.golden {
-  color: #ffd700;
+  color: var(--tier-golden);
 }
 
 .rewards-totals {
@@ -491,7 +606,7 @@ button:focus-visible {
 .reward-row {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
+  padding: var(--space-2) 0;
   font-size: 13px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
@@ -575,9 +690,15 @@ button:focus-visible {
 }
 
 .cosmetic-items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: block;
+  overflow-y: auto;
+  height: 100%;
+  position: relative;
+}
+
+.virtual-scroll-content {
+  position: relative;
+  width: 100%;
 }
 
 .cosmetic-item {
@@ -589,6 +710,8 @@ button:focus-visible {
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  height: 90px;
+  box-sizing: border-box;
 }
 
 .cosmetic-thumbnail {

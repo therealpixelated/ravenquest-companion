@@ -9,3 +9,5 @@ Thumbs.db
 .env
 *.orig
 *.tmp
+assets/ravenquest-interface-example.png
+.agents
