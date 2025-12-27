@@ -58,7 +58,6 @@ Adapt the app to your playstyle:
 |------|-------------|------------|
 | **Full View** | Complete tracking interface | ![Full](docs/screenshots/full-trophies.png) |
 | **Compact Sidebar** | Slim sidebar with stats & targets | ![Sidebar](docs/screenshots/compact-sidebar.png) |
-| **Floating Tracker** | Small moveable checklist | ![Float](docs/screenshots/compact-floating.png) |
 
 ### 📈 Dashboard Stats
 Real-time progress in the top bar:
