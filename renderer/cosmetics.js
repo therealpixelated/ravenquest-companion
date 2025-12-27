@@ -5,10 +5,39 @@ let activeCosmeticCategory = ''; // Track active category tab
 // Virtual scrolling state
 let filteredCosmetics = [];
 let scrollTop = 0;
-const ITEM_HEIGHT = 100; // Approximate height of each cosmetic item in px
+const ITEM_HEIGHT = 100; // Default, will sync from CSS
 const BUFFER_ITEMS = 5; // Extra items to render above/below viewport
 
-const helpers = window.uiHelpers || {
+/**
+ * Gets the current slot height for virtual scroll positioning
+ * Reads from :root CSS variable, with fallback
+ */
+function getItemHeight() {
+  const root = document.documentElement;
+  const styles = getComputedStyle(root);
+
+  // Try slot height first (item + gap)
+  const slotHeight = styles.getPropertyValue('--cosmetic-slot-height');
+  if (slotHeight) {
+    const parsed = parseInt(slotHeight, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return parsed;
+    }
+  }
+
+  // Fallback: calculate from item height + default gap
+  const itemHeight = styles.getPropertyValue('--cosmetic-item-height');
+  if (itemHeight) {
+    const parsed = parseInt(itemHeight, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) {
+      return parsed + 8; // Add 8px gap
+    }
+  }
+
+  return ITEM_HEIGHT + 8; // Final fallback: 100px + 8px
+}
+
+const cosmeticHelpers = window.uiHelpers || {
   showToast: () => {},
   setLoading: () => {},
   debounce: (fn) => fn
@@ -52,10 +81,10 @@ function isCollected(item, state) {
 
 async function initCosmetics() {
   try {
-    helpers.setLoading(true);
+    cosmeticHelpers.setLoading(true);
     const data = await window.electronAPI.getData();
     if (Array.isArray(data?.warnings)) {
-      data.warnings.forEach((msg) => helpers.showToast(msg, 'error'));
+      data.warnings.forEach((msg) => cosmeticHelpers.showToast(msg, 'error'));
     }
     cosmetics = data.cosmetics.items || [];
     cosmeticState = (await window.electronAPI.getCosmeticsState()) || {};
@@ -74,9 +103,9 @@ async function initCosmetics() {
     }
   } catch (err) {
     console.error('Failed to init cosmetics', err);
-    helpers.showToast('Failed to load cosmetics', 'error');
+    cosmeticHelpers.showToast('Failed to load cosmetics', 'error');
   } finally {
-    helpers.setLoading(false);
+    cosmeticHelpers.setLoading(false);
   }
 }
 
@@ -137,10 +166,17 @@ function buildCategoryFilters() {
 
 function updateLevel2Filter() {
   const level2Select = document.getElementById('cosmeticLevel2');
+  const level2Group = document.getElementById('cosmeticLevel2Group');
   if (!level2Select) return;
 
   const level2Set = window.cosmeticLevel2ByCategory[activeCosmeticCategory] || new Set();
   level2Select.innerHTML = '<option value="">All</option>';
+
+  // Show/hide group based on whether sub-categories exist
+  if (level2Group) {
+    level2Group.style.display = level2Set.size > 0 ? '' : 'none';
+  }
+
   [...level2Set].sort().forEach((v) => {
     const opt = document.createElement('option');
     opt.value = v;
@@ -154,15 +190,25 @@ function attachCosmeticFilterListeners() {
     const el = document.getElementById(id);
     if (!el) return;
     const evt = el.tagName === 'INPUT' ? 'input' : 'change';
-    const debounced = helpers.debounce(renderCosmetics, 150);
+    const debounced = cosmeticHelpers.debounce(renderCosmetics, 150);
     el.addEventListener(evt, debounced);
   });
 
   // Setup virtual scroll listener
   const list = document.getElementById('cosmeticsListContainer');
   if (list) {
-    list.addEventListener('scroll', helpers.debounce(handleVirtualScroll, 16));
+    list.addEventListener('scroll', cosmeticHelpers.debounce(handleVirtualScroll, 16));
   }
+
+  // Re-render on window resize (item height may change at breakpoints)
+  window.addEventListener(
+    'resize',
+    cosmeticHelpers.debounce(() => {
+      if (filteredCosmetics.length > 0) {
+        renderVisibleItems();
+      }
+    }, 150)
+  );
 }
 
 /**
@@ -173,10 +219,11 @@ function handleVirtualScroll() {
   if (!list) return;
 
   const newScrollTop = list.scrollTop;
+  const itemHeight = getItemHeight();
   const scrollDelta = Math.abs(newScrollTop - scrollTop);
 
   // Only re-render if scrolled more than half an item height
-  if (scrollDelta > ITEM_HEIGHT / 2) {
+  if (scrollDelta > itemHeight / 2) {
     scrollTop = newScrollTop;
     renderVisibleItems();
   }
@@ -186,10 +233,11 @@ function handleVirtualScroll() {
  * Calculates visible range based on scroll position
  */
 function getVisibleRange(containerHeight) {
-  const startIndex = Math.max(0, Math.floor(scrollTop / ITEM_HEIGHT) - BUFFER_ITEMS);
-  const visibleCount = Math.ceil(containerHeight / ITEM_HEIGHT) + BUFFER_ITEMS * 2;
+  const itemHeight = getItemHeight();
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - BUFFER_ITEMS);
+  const visibleCount = Math.ceil(containerHeight / itemHeight) + BUFFER_ITEMS * 2;
   const endIndex = Math.min(filteredCosmetics.length, startIndex + visibleCount);
-  return { startIndex, endIndex };
+  return { startIndex, endIndex, itemHeight };
 }
 
 /**
@@ -219,28 +267,38 @@ function createCosmeticItem(item) {
   const info = document.createElement('div');
   info.className = 'cosmetic-info';
   const categoryPath = item.categoryPath || '';
-  info.innerHTML = `
-    <div class="cosmetic-name">${item.name}</div>
-    <div class="cosmetic-meta">${categoryPath}</div>
-    <div class="cosmetic-renown">Renown: ${item.renown ?? 0}</div>
-  `;
 
   const mats = item.materials || [];
   let progressFill = null;
   let progressText = null;
 
+  // Create renown row with progress bar inline
+  const renownRow = document.createElement('div');
+  renownRow.className = 'cosmetic-renown-row';
+
+  const renownSpan = document.createElement('span');
+  renownSpan.className = 'cosmetic-renown';
+  renownSpan.textContent = `Renown: ${item.renown ?? 0}`;
+  renownRow.appendChild(renownSpan);
+
   if (mats.length > 0) {
     const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar';
+    progressBar.className = 'progress-bar inline';
     progressFill = document.createElement('div');
     progressFill.className = 'progress-fill';
     progressText = document.createElement('span');
     progressText.className = 'progress-text';
     progressBar.appendChild(progressFill);
     progressBar.appendChild(progressText);
-    info.appendChild(progressBar);
+    renownRow.appendChild(progressBar);
     updateProgressBar(progressFill, progressText, item, cosmeticState[item.id]);
   }
+
+  info.innerHTML = `
+    <div class="cosmetic-name">${item.name}</div>
+    <div class="cosmetic-meta">${categoryPath}</div>
+  `;
+  info.appendChild(renownRow);
 
   const materials = document.createElement('div');
   materials.className = 'cosmetic-materials';
@@ -286,7 +344,7 @@ function createCosmeticItem(item) {
           }
         } catch (saveErr) {
           console.error('Failed to save cosmetic materials', saveErr);
-          helpers.showToast('Could not save materials update', 'error');
+          cosmeticHelpers.showToast('Could not save materials update', 'error');
         }
       });
       materialInputs.push({ input, mat });
@@ -330,7 +388,7 @@ function createCosmeticItem(item) {
       }
     } catch (saveErr) {
       console.error('Failed to save cosmetic state', saveErr);
-      helpers.showToast('Could not save cosmetic state', 'error');
+      cosmeticHelpers.showToast('Could not save cosmetic state', 'error');
       e.target.checked = !collected;
     }
   });
@@ -353,7 +411,7 @@ function renderVisibleItems() {
   if (!list || filteredCosmetics.length === 0) return;
 
   const containerHeight = list.clientHeight;
-  const { startIndex, endIndex } = getVisibleRange(containerHeight);
+  const { startIndex, endIndex, itemHeight } = getVisibleRange(containerHeight);
 
   // Get or create the virtual scroll container
   let content = list.querySelector('.virtual-scroll-content');
@@ -364,7 +422,7 @@ function renderVisibleItems() {
   }
 
   // Set total height for scrollbar
-  const totalHeight = filteredCosmetics.length * ITEM_HEIGHT;
+  const totalHeight = filteredCosmetics.length * itemHeight;
   content.style.height = `${totalHeight}px`;
   content.style.position = 'relative';
 
@@ -378,7 +436,7 @@ function renderVisibleItems() {
 
     const element = createCosmeticItem(item);
     element.style.position = 'absolute';
-    element.style.top = `${i * ITEM_HEIGHT}px`;
+    element.style.top = `${i * itemHeight}px`;
     element.style.left = '0';
     element.style.right = '0';
     fragment.appendChild(element);
@@ -442,10 +500,64 @@ function updateCosmeticTotals(filteredItems = cosmetics) {
     0
   );
 
+  // Calculate max renown (if all collected)
+  const maxRenown = cosmetics.reduce((sum, item) => sum + (item.renown || 0), 0);
+
   const collectedEl = document.getElementById('cosmeticCollectedCount');
   const renownEl = document.getElementById('cosmeticRenownTotal');
+  const maxRenownEl = document.getElementById('cosmeticMaxRenown');
+
   if (collectedEl) collectedEl.textContent = `${collected}/${total}`;
   if (renownEl) renownEl.textContent = renown.toLocaleString();
+  if (maxRenownEl) maxRenownEl.textContent = `/ ${maxRenown.toLocaleString()}`;
+
+  // Update category breakdown
+  updateCategoryBreakdown();
+}
+
+function updateCategoryBreakdown() {
+  const container = document.getElementById('categoryBreakdownContainer');
+  if (!container) return;
+
+  // Calculate stats per category (level1)
+  const categoryStats = {};
+
+  cosmetics.forEach((item) => {
+    const cat = item.category?.level1 || 'Unknown';
+    if (!categoryStats[cat]) {
+      categoryStats[cat] = {
+        collected: 0,
+        total: 0,
+        renown: 0,
+        maxRenown: 0
+      };
+    }
+
+    categoryStats[cat].total++;
+    categoryStats[cat].maxRenown += item.renown || 0;
+
+    if (isCollected(item, cosmeticState[item.id])) {
+      categoryStats[cat].collected++;
+      categoryStats[cat].renown += item.renown || 0;
+    }
+  });
+
+  // Sort categories by name
+  const sortedCategories = Object.entries(categoryStats).sort((a, b) => a[0].localeCompare(b[0]));
+
+  // Render
+  container.innerHTML = sortedCategories
+    .map(([name, stats]) => {
+      const isComplete = stats.collected === stats.total;
+      return `
+      <div class="category-row ${isComplete ? 'complete' : ''}">
+        <span class="category-name">${name}</span>
+        <span class="category-count">${stats.collected}/${stats.total}</span>
+        <span class="category-renown">${stats.renown.toLocaleString()} / ${stats.maxRenown.toLocaleString()}</span>
+      </div>
+    `;
+    })
+    .join('');
 }
 
 // kick off after DOM ready

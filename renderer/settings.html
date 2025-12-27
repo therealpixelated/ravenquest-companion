@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self'; object-src 'none'; frame-ancestors 'self';"
+    />
+    <title>Settings - RavenQuest Companion</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        background: transparent;
+        margin: 0;
+        padding: 0;
+      }
+      .settings-window {
+        background: var(--game-bg-dark);
+        border: 2px solid var(--game-border-bronze);
+        border-radius: var(--radius-lg);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-3);
+        background: linear-gradient(180deg, var(--game-bg-base) 0%, var(--game-bg-dark) 100%);
+        border-bottom: 1px solid var(--game-border-dark);
+        -webkit-app-region: drag;
+      }
+      .settings-header h2 {
+        margin: 0;
+        font-size: var(--font-lg);
+        color: var(--game-text-gold);
+      }
+      .settings-close-btn {
+        background: rgba(231, 76, 60, 0.2);
+        border: 1px solid var(--game-text-red);
+        border-radius: var(--radius-sm);
+        color: var(--game-text-red);
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-app-region: no-drag;
+        transition: all var(--transition-fast);
+      }
+      .settings-close-btn:hover {
+        background: rgba(231, 76, 60, 0.4);
+      }
+      .settings-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: var(--space-3);
+      }
+      .settings-section {
+        margin-bottom: var(--space-4);
+      }
+      .settings-section-title {
+        font-size: var(--font-sm);
+        color: var(--game-text-gold);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: var(--space-2);
+        padding-bottom: var(--space-1);
+        border-bottom: 1px solid var(--game-border-dark);
+      }
+      .setting-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-2) 0;
+      }
+      .setting-label {
+        color: var(--game-text-cream);
+        font-size: var(--font-sm);
+      }
+      .setting-toggle {
+        position: relative;
+        width: 40px;
+        height: 20px;
+      }
+      .setting-toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .setting-toggle .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: var(--game-bg-darkest);
+        border: 1px solid var(--game-border-dark);
+        border-radius: 20px;
+        transition: var(--transition-fast);
+      }
+      .setting-toggle .slider:before {
+        position: absolute;
+        content: "";
+        height: 14px;
+        width: 14px;
+        left: 2px;
+        bottom: 2px;
+        background: var(--game-text-muted);
+        border-radius: 50%;
+        transition: var(--transition-fast);
+      }
+      .setting-toggle input:checked + .slider {
+        background: rgba(201, 168, 76, 0.3);
+        border-color: var(--game-gold);
+      }
+      .setting-toggle input:checked + .slider:before {
+        background: var(--game-gold);
+        transform: translateX(20px);
+      }
+      .view-mode-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-2);
+        margin-top: var(--space-2);
+      }
+      .view-mode-btn {
+        background: var(--game-bg-darkest);
+        border: 1px solid var(--game-border-dark);
+        border-radius: var(--radius-md);
+        padding: var(--space-2);
+        color: var(--game-text-cream);
+        cursor: pointer;
+        text-align: center;
+        font-size: var(--font-xs);
+        transition: all var(--transition-fast);
+      }
+      .view-mode-btn:hover {
+        border-color: var(--game-border-bronze);
+      }
+      .view-mode-btn.active {
+        border-color: var(--game-gold);
+        background: rgba(201, 168, 76, 0.1);
+        color: var(--game-gold);
+      }
+      .opacity-slider {
+        width: 100%;
+        margin-top: var(--space-2);
+      }
+      .hotkey-display {
+        background: var(--game-bg-darkest);
+        border: 1px solid var(--game-border-dark);
+        border-radius: var(--radius-sm);
+        padding: var(--space-2) var(--space-3);
+        color: var(--game-gold);
+        font-family: monospace;
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+      .hotkey-display:hover {
+        border-color: var(--game-border-bronze);
+      }
+      .hotkey-display.recording {
+        border-color: var(--game-gold);
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+      .danger-zone {
+        margin-top: var(--space-4);
+        padding-top: var(--space-3);
+        border-top: 1px solid rgba(231, 76, 60, 0.3);
+      }
+      .danger-btn {
+        background: rgba(231, 76, 60, 0.1);
+        border: 1px solid var(--game-text-red);
+        border-radius: var(--radius-sm);
+        color: var(--game-text-red);
+        padding: var(--space-2) var(--space-3);
+        cursor: pointer;
+        font-size: var(--font-sm);
+        width: 100%;
+        margin-top: var(--space-2);
+        transition: all var(--transition-fast);
+      }
+      .danger-btn:hover {
+        background: rgba(231, 76, 60, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="settings-window">
+      <div class="settings-header">
+        <h2>⚙️ Settings</h2>
+        <button class="settings-close-btn" id="closeBtn">×</button>
+      </div>
+      <div class="settings-body">
+        <div class="settings-section">
+          <div class="settings-section-title">Display</div>
+          <div class="setting-row">
+            <span class="setting-label">Show Trophy Count</span>
+            <label class="setting-toggle">
+              <input type="checkbox" id="showTrophyCount" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Show Cosmetics Count</span>
+            <label class="setting-toggle">
+              <input type="checkbox" id="showCosmeticsCount" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Show Renown</span>
+            <label class="setting-toggle">
+              <input type="checkbox" id="showRenown" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="setting-row">
+            <span class="setting-label">Show Stat Bonuses</span>
+            <label class="setting-toggle">
+              <input type="checkbox" id="showStatBonuses">
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">View Mode</div>
+          <div class="view-mode-grid">
+            <button class="view-mode-btn" data-mode="full">Full Window</button>
+            <button class="view-mode-btn" data-mode="compact-sidebar">Compact Sidebar</button>
+            <button class="view-mode-btn" data-mode="compact-bar">Minimal Bar</button>
+            <button class="view-mode-btn" data-mode="compact-floating">Floating</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Opacity</div>
+          <input type="range" class="opacity-slider" id="opacitySlider" min="20" max="100" value="100">
+          <div class="setting-row">
+            <span class="setting-label">Window Opacity</span>
+            <span id="opacityValue">100%</span>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-title">Hotkey</div>
+          <div class="setting-row">
+            <span class="setting-label">Toggle Overlay</span>
+            <button class="hotkey-display" id="hotkeyBtn">Ctrl+Alt+F12</button>
+          </div>
+        </div>
+
+        <div class="danger-zone">
+          <div class="settings-section-title" style="color: var(--game-text-red);">Danger Zone</div>
+          <button class="danger-btn" id="resetCountersBtn">Reset Kill Counters</button>
+          <button class="danger-btn" id="resetProgressBtn">Reset All Progress</button>
+        </div>
+      </div>
+    </div>
+    <script src="settings-window.js"></script>
+  </body>
+</html>

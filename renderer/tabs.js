@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', () => {
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = btn.dataset.tab;
+
+      // Close settings panel if open
+      if (typeof window.closeSettings === 'function') {
+        window.closeSettings();
+      }
+
       buttons.forEach((b) => {
         const isActive = b === btn;
         b.classList.toggle('active', isActive);
@@ -25,5 +31,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const delta = e.key === 'ArrowRight' ? 1 : -1;
     const nextIndex = (activeIndex + delta + buttons.length) % buttons.length;
     buttons[nextIndex].click();
+  });
+
+  // Right-click context menu
+  document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    if (window.electronAPI?.showContextMenu) {
+      window.electronAPI.showContextMenu();
+    }
   });
 });

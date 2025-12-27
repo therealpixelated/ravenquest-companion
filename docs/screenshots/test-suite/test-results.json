@@ -1,0 +1,665 @@
+{
+  "timestamp": "2025-12-27T02:59:34.932Z",
+  "duration": 23757,
+  "summary": {
+    "passed": 41,
+    "failed": 13,
+    "screenshots": 41
+  },
+  "tests": [
+    {
+      "name": "trophies-creature",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-trophies-creature"
+    },
+    {
+      "name": "trophies-ocean",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-trophies-ocean"
+    },
+    {
+      "name": "trophies-monuments",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-trophies-monuments"
+    },
+    {
+      "name": "trophies-carnival",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-trophies-carnival"
+    },
+    {
+      "name": "trophies-creature-reset",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-trophies-creature-reset"
+    },
+    {
+      "name": "filter-search",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-filter-search"
+    },
+    {
+      "name": "filter-clear",
+      "size": "large",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-status",
+      "size": "large",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-status-reset",
+      "size": "large",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "cosmetics-main",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-cosmetics-main"
+    },
+    {
+      "name": "cosmetics-outfit",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-cosmetics-outfit"
+    },
+    {
+      "name": "cosmetics-mounts",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-cosmetics-mounts"
+    },
+    {
+      "name": "cosmetics-estate",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-cosmetics-estate"
+    },
+    {
+      "name": "cosmetics-all",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-cosmetics-all"
+    },
+    {
+      "name": "settings-open",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-settings-open"
+    },
+    {
+      "name": "settings-scroll",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-settings-scroll"
+    },
+    {
+      "name": "settings-close",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-settings-close"
+    },
+    {
+      "name": "final-trophies",
+      "size": "large",
+      "success": true,
+      "screenshot": "large-final-trophies"
+    },
+    {
+      "name": "trophies-creature",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-trophies-creature"
+    },
+    {
+      "name": "trophies-ocean",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-trophies-ocean"
+    },
+    {
+      "name": "trophies-monuments",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-trophies-monuments"
+    },
+    {
+      "name": "trophies-carnival",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-trophies-carnival"
+    },
+    {
+      "name": "trophies-creature-reset",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-trophies-creature-reset"
+    },
+    {
+      "name": "filter-search",
+      "size": "medium",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-clear",
+      "size": "medium",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-status",
+      "size": "medium",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-status-reset",
+      "size": "medium",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "cosmetics-main",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-cosmetics-main"
+    },
+    {
+      "name": "cosmetics-outfit",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-cosmetics-outfit"
+    },
+    {
+      "name": "cosmetics-mounts",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-cosmetics-mounts"
+    },
+    {
+      "name": "cosmetics-estate",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-cosmetics-estate"
+    },
+    {
+      "name": "cosmetics-all",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-cosmetics-all"
+    },
+    {
+      "name": "settings-open",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-settings-open"
+    },
+    {
+      "name": "settings-scroll",
+      "size": "medium",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "settings-close",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-settings-close"
+    },
+    {
+      "name": "final-trophies",
+      "size": "medium",
+      "success": true,
+      "screenshot": "medium-final-trophies"
+    },
+    {
+      "name": "trophies-creature",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-trophies-creature"
+    },
+    {
+      "name": "trophies-ocean",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-trophies-ocean"
+    },
+    {
+      "name": "trophies-monuments",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-trophies-monuments"
+    },
+    {
+      "name": "trophies-carnival",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-trophies-carnival"
+    },
+    {
+      "name": "trophies-creature-reset",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-trophies-creature-reset"
+    },
+    {
+      "name": "filter-search",
+      "size": "small",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-clear",
+      "size": "small",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-status",
+      "size": "small",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "filter-status-reset",
+      "size": "small",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "cosmetics-main",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-cosmetics-main"
+    },
+    {
+      "name": "cosmetics-outfit",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-cosmetics-outfit"
+    },
+    {
+      "name": "cosmetics-mounts",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-cosmetics-mounts"
+    },
+    {
+      "name": "cosmetics-estate",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-cosmetics-estate"
+    },
+    {
+      "name": "cosmetics-all",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-cosmetics-all"
+    },
+    {
+      "name": "settings-open",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-settings-open"
+    },
+    {
+      "name": "settings-scroll",
+      "size": "small",
+      "success": false,
+      "error": "Script failed to execute, this normally means an error was thrown. Check the renderer console for the error."
+    },
+    {
+      "name": "settings-close",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-settings-close"
+    },
+    {
+      "name": "final-trophies",
+      "size": "small",
+      "success": true,
+      "screenshot": "small-final-trophies"
+    }
+  ],
+  "screenshots": [
+    {
+      "name": "large-trophies-creature",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-trophies-creature.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-trophies-ocean",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-trophies-ocean.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-trophies-monuments",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-trophies-monuments.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-trophies-carnival",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-trophies-carnival.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-trophies-creature-reset",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-trophies-creature-reset.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-filter-search",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-filter-search.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-cosmetics-main",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-cosmetics-main.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-cosmetics-outfit",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-cosmetics-outfit.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-cosmetics-mounts",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-cosmetics-mounts.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-cosmetics-estate",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-cosmetics-estate.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-cosmetics-all",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-cosmetics-all.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-settings-open",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-settings-open.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-settings-scroll",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-settings-scroll.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-settings-close",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-settings-close.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "large-final-trophies",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\large-final-trophies.png",
+      "size": {
+        "width": 1733,
+        "height": 1049
+      }
+    },
+    {
+      "name": "medium-trophies-creature",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-trophies-creature.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-trophies-ocean",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-trophies-ocean.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-trophies-monuments",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-trophies-monuments.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-trophies-carnival",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-trophies-carnival.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-trophies-creature-reset",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-trophies-creature-reset.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-cosmetics-main",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-cosmetics-main.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-cosmetics-outfit",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-cosmetics-outfit.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-cosmetics-mounts",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-cosmetics-mounts.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-cosmetics-estate",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-cosmetics-estate.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-cosmetics-all",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-cosmetics-all.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-settings-open",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-settings-open.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-settings-close",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-settings-close.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "medium-final-trophies",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\medium-final-trophies.png",
+      "size": {
+        "width": 1233,
+        "height": 797
+      }
+    },
+    {
+      "name": "small-trophies-creature",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-trophies-creature.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-trophies-ocean",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-trophies-ocean.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-trophies-monuments",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-trophies-monuments.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-trophies-carnival",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-trophies-carnival.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-trophies-creature-reset",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-trophies-creature-reset.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-cosmetics-main",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-cosmetics-main.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-cosmetics-outfit",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-cosmetics-outfit.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-cosmetics-mounts",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-cosmetics-mounts.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-cosmetics-estate",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-cosmetics-estate.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-cosmetics-all",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-cosmetics-all.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-settings-open",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-settings-open.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-settings-close",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-settings-close.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    },
+    {
+      "name": "small-final-trophies",
+      "filepath": "C:\\Users\\jgh0st\\OneDrive\\Repositories\\ravenquest-companion\\docs\\screenshots\\test-suite\\small-final-trophies.png",
+      "size": {
+        "width": 858,
+        "height": 674
+      }
+    }
+  ]
+}

@@ -26,7 +26,23 @@ const STAT_TYPES = [
 
 let trophies = [];
 let trackedStates = {}; // { trophyId: { base: bool, enchanted: bool, golden: bool } }
+let killCounters = {}; // { trophyId: { count, milestones: [] } }
+let sharedCounter = { count: 0, milestones: [] }; // Shared counter for Monuments
 let activeTrophyType = 'Creature Trophies'; // Track active sub-tab
+
+// Pending acquisition - stores info when user checks a tier
+let pendingAcquisition = null;
+
+// Track if listeners are already attached to prevent duplicates
+let listenersAttached = false;
+
+// Store listener references for cleanup
+const listenerRefs = {
+  statusFilter: null,
+  categoryFilter: null,
+  trophySearch: null,
+  tierFilter: null
+};
 
 // Make globally accessible for dashboard
 window.trophyData = { trophies: [], trackedStates: {} };
@@ -81,6 +97,15 @@ async function init() {
     // Load tracked states
     trackedStates = (await window.electronAPI.getTrophyStates()) || {};
 
+    // Load kill counters
+    killCounters = (await window.electronAPI.getKillCounters()) || {};
+
+    // Load shared counter for Monuments
+    sharedCounter = (await window.electronAPI.getSharedCounter()) || { count: 0, milestones: [] };
+
+    // Load active hunting targets
+    window.activeTargets = (await window.electronAPI.getActiveTargets()) || [];
+
     // Update global data for dashboard
     window.trophyData = { trophies, trackedStates };
 
@@ -89,110 +114,100 @@ async function init() {
     renderStatPanel();
     updateTotals();
 
-    // Setup filter listeners
-    const debouncedFilter = uiHelpers.debounce(filterAndRender, 150);
-    document.getElementById('statusFilter').addEventListener('change', debouncedFilter);
-    document.getElementById('categoryFilter').addEventListener('change', debouncedFilter);
-
-    // Setup trophy sub-tab listeners
-    document.querySelectorAll('.trophy-sub-tab').forEach((btn) => {
-      if (!btn.hasAttribute('aria-selected')) {
-        btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
-      }
-      btn.addEventListener('click', (e) => {
-        document.querySelectorAll('.trophy-sub-tab').forEach((b) => {
-          const isActive = b === e.target;
-          b.classList.toggle('active', isActive);
-          b.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        });
-        activeTrophyType = e.target.dataset.trophyType;
-        updateCategoryFilterVisibility();
-        filterAndRender();
-      });
-    });
+    // Setup acquisition modal handlers (only once)
+    if (!listenersAttached) {
+      setupAcquisitionModal();
+      setupFilterListeners();
+      listenersAttached = true;
+    }
 
     updateCategoryFilterVisibility();
-
-    // Trophy filter listeners
-    const trophySearchInput = document.getElementById('trophySearch');
-    if (trophySearchInput) {
-      trophySearchInput.addEventListener(
-        'input',
-        uiHelpers.debounce(() => filterAndRender())
-      );
-    }
-
-    const tierFilterSelect = document.getElementById('tierFilter');
-    if (tierFilterSelect) {
-      tierFilterSelect.addEventListener('change', () => filterAndRender());
-    }
-
-    const statusFilterSelect = document.getElementById('statusFilter');
-    if (statusFilterSelect) {
-      statusFilterSelect.addEventListener('change', () => filterAndRender());
-    }
-
-    const categoryFilterSelect = document.getElementById('categoryFilter');
-    if (categoryFilterSelect) {
-      categoryFilterSelect.addEventListener('change', () => filterAndRender());
-    }
-
-    const reloadBtn = document.getElementById('reloadDataBtn');
-    if (reloadBtn) {
-      reloadBtn.addEventListener('click', async () => {
-        uiHelpers.setLoading(true);
-        try {
-          const fresh = await window.electronAPI.reloadData();
-          if (Array.isArray(fresh?.warnings)) {
-            fresh.warnings.forEach((msg) => uiHelpers.showToast(msg, 'error'));
-          }
-          trophies = (fresh.trophies.items || []).map((t) => ({
-            ...t,
-            type: t.type || 'Creature Trophies'
-          }));
-          filterAndRender();
-          uiHelpers.showToast('Data reloaded', 'success');
-        } catch (err) {
-          console.error('Reload failed', err);
-          uiHelpers.showToast('Reload failed', 'error');
-        } finally {
-          uiHelpers.setLoading(false);
-        }
-      });
-    }
-
-    const opacitySlider = document.getElementById('opacitySlider');
-    if (opacitySlider) {
-      if (window.electronAPI.getOverlayOpacity) {
-        window.electronAPI
-          .getOverlayOpacity()
-          .then((val) => {
-            const pct = Math.round(Math.min(Math.max(val || 0.9, 0.2), 1) * 100);
-            opacitySlider.value = pct;
-          })
-          .catch(() => {});
-      }
-      opacitySlider.addEventListener('input', async (e) => {
-        const pct = Math.min(Math.max(parseInt(e.target.value || '90', 10), 20), 100);
-        e.target.value = pct;
-        if (window.electronAPI.setOverlayOpacity) {
-          await window.electronAPI.setOverlayOpacity(pct / 100);
-        }
-      });
-    }
-
-    if (window.electronAPI.onAlert) {
-      window.electronAPI.onAlert((payload) => {
-        if (payload?.type === 'reset') {
-          uiHelpers.showToast(payload.message || 'Daily reset', 'info');
-        }
-      });
-    }
+    updateDashboard();
   } catch (error) {
     console.error('Failed to initialize:', error);
     uiHelpers.showToast('Failed to load trophy data', 'error');
   } finally {
     uiHelpers.setLoading(false);
+  }
+}
+
+// Setup all filter listeners (called once)
+function setupFilterListeners() {
+  const debouncedFilter = uiHelpers.debounce(filterAndRender, 150);
+
+  // Store reference for status filter
+  const statusFilter = document.getElementById('statusFilter');
+  if (statusFilter) {
+    listenerRefs.statusFilter = debouncedFilter;
+    statusFilter.addEventListener('change', listenerRefs.statusFilter);
+  }
+
+  // Store reference for category filter
+  const categoryFilter = document.getElementById('categoryFilter');
+  if (categoryFilter) {
+    listenerRefs.categoryFilter = debouncedFilter;
+    categoryFilter.addEventListener('change', listenerRefs.categoryFilter);
+  }
+
+  // Setup trophy sub-tab listeners
+  document.querySelectorAll('.trophy-sub-tab').forEach((btn) => {
+    if (!btn.hasAttribute('aria-selected')) {
+      btn.setAttribute('aria-selected', btn.classList.contains('active') ? 'true' : 'false');
+    }
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.trophy-sub-tab').forEach((b) => {
+        const isActive = b === e.target;
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      activeTrophyType = e.target.dataset.trophyType;
+      updateCategoryFilterVisibility();
+      filterAndRender();
+    });
+  });
+
+  // Trophy search input
+  const trophySearchInput = document.getElementById('trophySearch');
+  if (trophySearchInput) {
+    listenerRefs.trophySearch = uiHelpers.debounce(() => filterAndRender());
+    trophySearchInput.addEventListener('input', listenerRefs.trophySearch);
+  }
+
+  // Tier filter
+  const tierFilterSelect = document.getElementById('tierFilter');
+  if (tierFilterSelect) {
+    listenerRefs.tierFilter = () => filterAndRender();
+    tierFilterSelect.addEventListener('change', listenerRefs.tierFilter);
+  }
+
+  // Opacity slider
+  const opacitySlider = document.getElementById('opacitySlider');
+  if (opacitySlider) {
+    if (window.electronAPI.getOverlayOpacity) {
+      window.electronAPI
+        .getOverlayOpacity()
+        .then((val) => {
+          const pct = Math.round(Math.min(Math.max(val || 0.9, 0.2), 1) * 100);
+          opacitySlider.value = pct;
+        })
+        .catch(() => {});
+    }
+    opacitySlider.addEventListener('input', async (e) => {
+      const pct = Math.min(Math.max(parseInt(e.target.value || '90', 10), 20), 100);
+      e.target.value = pct;
+      if (window.electronAPI.setOverlayOpacity) {
+        await window.electronAPI.setOverlayOpacity(pct / 100);
+      }
+    });
+  }
+
+  // Alert listener
+  if (window.electronAPI.onAlert) {
+    window.electronAPI.onAlert((payload) => {
+      if (payload?.type === 'reset') {
+        uiHelpers.showToast(payload.message || 'Daily reset', 'info');
+      }
+    });
   }
 }
 
@@ -279,8 +294,23 @@ function filterAndRender() {
     return true;
   });
 
+  // Update results count
+  updateResultsCount(filtered.length, trophies.length);
+
   renderTrophyList(filtered);
   updateDashboard();
+}
+
+// Update the results count display
+function updateResultsCount(shown, total) {
+  const countEl = document.getElementById('resultsCount');
+  if (!countEl) return;
+
+  if (shown === total) {
+    countEl.textContent = `Showing all ${total} trophies`;
+  } else {
+    countEl.textContent = `Showing ${shown} of ${total} trophies`;
+  }
 }
 
 // Render the trophy list
@@ -294,6 +324,12 @@ function renderTrophyList(trophiesToRender = trophies) {
     emptyMsg.textContent = 'No trophies match the selected filters';
     container.appendChild(emptyMsg);
     return;
+  }
+
+  // If viewing Monuments, show shared counter at top
+  if (activeTrophyType === 'Monuments') {
+    const sharedCounterEl = createSharedCounterUI();
+    container.appendChild(sharedCounterEl);
   }
 
   trophiesToRender.forEach((trophy) => {
@@ -376,7 +412,7 @@ function renderTrophyList(trophiesToRender = trophies) {
       }
 
       checkbox.addEventListener('change', (e) => {
-        handleCheckboxChange(trophy.id, tier, e.target.checked);
+        handleCheckboxChange(trophy.id, tier, e.target.checked, trophy);
       });
 
       group.appendChild(label);
@@ -386,32 +422,585 @@ function renderTrophyList(trophiesToRender = trophies) {
 
     item.appendChild(info);
     item.appendChild(checkboxes);
+
+    // Add track button for hunting targets
+    const trackBtn = document.createElement('button');
+    trackBtn.className = 'track-btn';
+    trackBtn.title = 'Add to hunting targets';
+    trackBtn.setAttribute('aria-label', `Track ${trophy.name}`);
+
+    // Check if already tracked
+    const isTracked = window.activeTargets?.some((t) => t.id === trophy.id);
+    trackBtn.classList.toggle('tracked', isTracked);
+    trackBtn.innerHTML = isTracked ? '🎯' : '➕';
+
+    trackBtn.addEventListener('click', () => toggleTrackTrophy(trophy, trackBtn));
+    item.appendChild(trackBtn);
+
+    // Add kill counter UI (only for trackable trophies)
+    const counterUI = createCounterUI(trophy);
+    if (counterUI) {
+      item.appendChild(counterUI);
+    }
+
     container.appendChild(item);
   });
 }
 
+// Toggle tracking a trophy for hunting
+async function toggleTrackTrophy(trophy, btn) {
+  try {
+    const targets = window.activeTargets || [];
+    const existingIndex = targets.findIndex((t) => t.id === trophy.id);
+
+    if (existingIndex >= 0) {
+      // Remove from tracking
+      targets.splice(existingIndex, 1);
+      btn.classList.remove('tracked');
+      btn.innerHTML = '➕';
+      uiHelpers.showToast(`Removed ${trophy.name} from hunting targets`, 'info');
+    } else {
+      // Add to tracking (max 5)
+      if (targets.length >= 5) {
+        uiHelpers.showToast('Maximum 5 hunting targets allowed', 'warning');
+        return;
+      }
+      targets.push({
+        id: trophy.id,
+        name: trophy.name,
+        type: trophy.type,
+        creature: trophy.creature
+      });
+      btn.classList.add('tracked');
+      btn.innerHTML = '🎯';
+      uiHelpers.showToast(`Added ${trophy.name} to hunting targets`, 'success');
+    }
+
+    window.activeTargets = targets;
+    await window.electronAPI.saveActiveTargets(targets);
+  } catch (error) {
+    console.error('Failed to toggle tracking:', error);
+    uiHelpers.showToast('Failed to update tracking', 'error');
+  }
+}
+
+// Create shared counter UI for Monuments (Aether trophies)
+function createSharedCounterUI() {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'shared-counter-section';
+
+  const header = document.createElement('div');
+  header.className = 'shared-counter-header';
+  header.innerHTML = `
+    <span class="shared-counter-title">🎯 Boss Kill Tracker</span>
+    <span class="shared-counter-desc">Track your boss kills - monuments drop randomly from any boss</span>
+  `;
+
+  const counterRow = document.createElement('div');
+  counterRow.className = 'shared-counter-row';
+
+  const labelSpan = document.createElement('span');
+  labelSpan.className = 'counter-label';
+  labelSpan.textContent = 'Bosses Defeated:';
+
+  const valueSpan = document.createElement('span');
+  valueSpan.className = 'counter-value shared-counter-value';
+  valueSpan.id = 'shared-counter-value';
+  valueSpan.textContent = sharedCounter.count.toLocaleString();
+
+  const buttons = document.createElement('div');
+  buttons.className = 'counter-buttons';
+
+  const btnMinus = document.createElement('button');
+  btnMinus.className = 'counter-btn';
+  btnMinus.textContent = '-1';
+  btnMinus.addEventListener('click', () => updateSharedCounter(-1));
+
+  const btnPlus1 = document.createElement('button');
+  btnPlus1.className = 'counter-btn';
+  btnPlus1.textContent = '+1';
+  btnPlus1.addEventListener('click', () => updateSharedCounter(1));
+
+  const btnPlus10 = document.createElement('button');
+  btnPlus10.className = 'counter-btn';
+  btnPlus10.textContent = '+10';
+  btnPlus10.addEventListener('click', () => updateSharedCounter(10));
+
+  const btnReset = document.createElement('button');
+  btnReset.className = 'counter-btn reset';
+  btnReset.textContent = '↺';
+  btnReset.title = 'Reset counter (keeps milestone history)';
+  btnReset.addEventListener('click', resetSharedCounter);
+
+  buttons.appendChild(btnMinus);
+  buttons.appendChild(btnPlus1);
+  buttons.appendChild(btnPlus10);
+  buttons.appendChild(btnReset);
+
+  counterRow.appendChild(labelSpan);
+  counterRow.appendChild(valueSpan);
+  counterRow.appendChild(buttons);
+
+  wrapper.appendChild(header);
+  wrapper.appendChild(counterRow);
+
+  return wrapper;
+}
+
+// Update shared counter
+async function updateSharedCounter(amount) {
+  try {
+    const result = await window.electronAPI.incrementSharedCounter(amount);
+    if (result.success) {
+      sharedCounter = result.counter;
+      const valueEl = document.getElementById('shared-counter-value');
+      if (valueEl) {
+        valueEl.textContent = result.counter.count.toLocaleString();
+      }
+    }
+  } catch (err) {
+    console.error('Failed to update shared counter:', err);
+    uiHelpers.showToast('Failed to update counter', 'error');
+  }
+}
+
+// Reset shared counter
+async function resetSharedCounter() {
+  try {
+    const result = await window.electronAPI.resetSharedCounter();
+    if (result.success) {
+      sharedCounter = result.counter;
+      const valueEl = document.getElementById('shared-counter-value');
+      if (valueEl) {
+        valueEl.textContent = '0';
+      }
+      uiHelpers.showToast('Counter reset (milestones preserved)', 'info');
+    }
+  } catch (err) {
+    console.error('Failed to reset shared counter:', err);
+    uiHelpers.showToast('Failed to reset counter', 'error');
+  }
+}
+
+// Create the kill counter UI for a trophy
+function createCounterUI(trophy) {
+  // Monuments use shared counter, don't show individual
+  if (trophy.type === 'Monuments') {
+    return null;
+  }
+
+  const counter = killCounters[trophy.id] || { count: 0, milestones: [] };
+
+  const wrapper = document.createElement('div');
+  wrapper.className = 'trophy-counter';
+  wrapper.dataset.trophyId = trophy.id;
+
+  // Get counter config for label
+  const counterType = getCounterTypeForTrophy(trophy);
+
+  // Counter display
+  const labelSpan = document.createElement('span');
+  labelSpan.className = 'counter-label';
+  labelSpan.textContent = `${counterType.label}:`;
+
+  const valueSpan = document.createElement('span');
+  valueSpan.className = 'counter-value';
+  valueSpan.id = `counter-${trophy.id}`;
+  valueSpan.textContent = counter.count.toLocaleString();
+
+  // Buttons
+  const buttons = document.createElement('div');
+  buttons.className = 'counter-buttons';
+
+  const btnMinus = document.createElement('button');
+  btnMinus.className = 'counter-btn';
+  btnMinus.textContent = '-1';
+  btnMinus.addEventListener('click', () => updateCounter(trophy.id, -1));
+
+  const btnPlus1 = document.createElement('button');
+  btnPlus1.className = 'counter-btn';
+  btnPlus1.textContent = '+1';
+  btnPlus1.addEventListener('click', () => updateCounter(trophy.id, 1));
+
+  const btnPlus10 = document.createElement('button');
+  btnPlus10.className = 'counter-btn';
+  btnPlus10.textContent = '+10';
+  btnPlus10.addEventListener('click', () => updateCounter(trophy.id, 10));
+
+  const btnReset = document.createElement('button');
+  btnReset.className = 'counter-btn reset';
+  btnReset.textContent = '↺';
+  btnReset.title = 'Reset counter (keeps milestone history)';
+  btnReset.addEventListener('click', () => resetCounter(trophy.id));
+
+  buttons.appendChild(btnMinus);
+  buttons.appendChild(btnPlus1);
+  buttons.appendChild(btnPlus10);
+  buttons.appendChild(btnReset);
+
+  wrapper.appendChild(labelSpan);
+  wrapper.appendChild(valueSpan);
+  wrapper.appendChild(buttons);
+
+  // Add milestones display if any exist
+  if (counter.milestones && counter.milestones.length > 0) {
+    const milestonesDiv = createMilestonesDisplay(counter.milestones);
+    wrapper.appendChild(milestonesDiv);
+  }
+
+  return wrapper;
+}
+
+// Get counter type config for a trophy
+function getCounterTypeForTrophy(trophy) {
+  const overrides = {
+    moa_carnival_trophy: { type: 'spins', label: 'Wheel Spins' },
+    munk_carnival_trophy: { type: 'bets', label: 'Total Bets' }
+  };
+
+  if (overrides[trophy.id]) {
+    return overrides[trophy.id];
+  }
+
+  const typeConfig = {
+    'Creature Trophies': { type: 'kills', label: 'Kills' },
+    'Ocean Trophies': { type: 'kills', label: 'Kills' },
+    Monuments: { type: 'bossKills', label: 'Bosses Defeated' },
+    'Carnival Trophies': { type: 'default', label: 'Count' }
+  };
+
+  return typeConfig[trophy.type] || { type: 'kills', label: 'Kills' };
+}
+
+// Create milestones display
+function createMilestonesDisplay(milestones) {
+  const div = document.createElement('div');
+  div.className = 'trophy-milestones';
+
+  const globalStats = window.globalStats || { averageCount: 0 };
+
+  milestones.forEach((m) => {
+    const span = document.createElement('span');
+    span.className = 'milestone obtained';
+
+    let icon = '🎯';
+    let countDisplay = '';
+
+    if (m.method === 'purchased') {
+      icon = '💰';
+      countDisplay = 'Purchased';
+    } else if (m.method === 'gambled') {
+      icon = '🎰';
+      countDisplay = 'Gambled';
+    } else if (m.count !== null) {
+      countDisplay = m.count.toLocaleString();
+
+      // Add luck indicator if we have average data
+      if (globalStats.averageCount > 0) {
+        const luckRatio = m.count / globalStats.averageCount;
+        let luckClass = 'average';
+        let luckText = '';
+
+        if (luckRatio < 0.7) {
+          luckClass = 'lucky';
+          luckText = '🍀';
+        } else if (luckRatio > 1.3) {
+          luckClass = 'unlucky';
+          luckText = '';
+        }
+
+        if (luckText) {
+          countDisplay += ` <span class="luck-indicator ${luckClass}">${luckText}</span>`;
+        }
+      }
+    }
+
+    span.innerHTML = `
+      <span class="milestone-icon">${icon}</span>
+      <span class="milestone-tier">${m.tier}:</span>
+      <span class="milestone-count">${countDisplay}</span>
+    `;
+
+    div.appendChild(span);
+  });
+
+  return div;
+}
+
+// Update counter value
+async function updateCounter(trophyId, amount) {
+  try {
+    const result = await window.electronAPI.incrementCounter(trophyId, amount);
+    if (result.success) {
+      killCounters[trophyId] = result.counter;
+      const valueEl = document.getElementById(`counter-${trophyId}`);
+      if (valueEl) {
+        valueEl.textContent = result.counter.count.toLocaleString();
+      }
+    }
+  } catch (err) {
+    console.error('Failed to update counter:', err);
+    uiHelpers.showToast('Failed to update counter', 'error');
+  }
+}
+
+// Reset counter (keeps milestones)
+async function resetCounter(trophyId) {
+  try {
+    const result = await window.electronAPI.resetCounter(trophyId);
+    if (result.success) {
+      killCounters[trophyId] = result.counter;
+      const valueEl = document.getElementById(`counter-${trophyId}`);
+      if (valueEl) {
+        valueEl.textContent = '0';
+      }
+      uiHelpers.showToast('Counter reset (milestones preserved)', 'info');
+    }
+  } catch (err) {
+    console.error('Failed to reset counter:', err);
+    uiHelpers.showToast('Failed to reset counter', 'error');
+  }
+}
+
+// Setup acquisition modal event handlers
+function setupAcquisitionModal() {
+  const modal = document.getElementById('acquisitionModal');
+  const cancelBtn = document.getElementById('acquisitionCancel');
+
+  if (!modal || !cancelBtn) return;
+
+  // Cancel button
+  cancelBtn.addEventListener('click', () => {
+    closeAcquisitionModal(false);
+  });
+
+  // Option buttons
+  const options = modal.querySelectorAll('.modal-option');
+  options.forEach((btn, index) => {
+    // Make options focusable
+    btn.setAttribute('tabindex', '0');
+    btn.setAttribute('role', 'button');
+
+    btn.addEventListener('click', () => {
+      const method = btn.dataset.method;
+      if (method && pendingAcquisition) {
+        completeAcquisition(method);
+      }
+    });
+
+    // Enter/Space to activate
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const method = btn.dataset.method;
+        if (method && pendingAcquisition) {
+          completeAcquisition(method);
+        }
+      }
+      // Arrow key navigation
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        const next = options[index + 1] || cancelBtn;
+        next.focus();
+      }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        const prev = options[index - 1] || options[options.length - 1];
+        prev.focus();
+      }
+    });
+  });
+
+  // Make cancel button part of navigation
+  cancelBtn.setAttribute('tabindex', '0');
+  cancelBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      options[options.length - 1]?.focus();
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+      e.preventDefault();
+      options[0]?.focus();
+    }
+  });
+
+  // Click outside to cancel
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeAcquisitionModal(false);
+    }
+  });
+
+  // Escape key to close - use document level for reliability
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('active')) {
+      e.preventDefault();
+      closeAcquisitionModal(false);
+    }
+  });
+}
+
+// Store the element that had focus before modal opened
+let previousFocus = null;
+
+// Show acquisition modal
+function showAcquisitionModal(trophyId, tier, trophy) {
+  pendingAcquisition = { trophyId, tier, trophy };
+
+  const modal = document.getElementById('acquisitionModal');
+  if (modal) {
+    // Store current focus to restore later
+    previousFocus = document.activeElement;
+
+    modal.classList.add('active');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-label', `How did you acquire the ${tier} tier?`);
+
+    // Focus the first option after a brief delay for animation
+    setTimeout(() => {
+      const firstOption = modal.querySelector('.modal-option');
+      if (firstOption) firstOption.focus();
+    }, 100);
+  }
+}
+
+// Close acquisition modal
+function closeAcquisitionModal(completed = false) {
+  const modal = document.getElementById('acquisitionModal');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.removeAttribute('aria-modal');
+  }
+
+  // Restore focus to previous element
+  if (previousFocus && previousFocus.focus) {
+    previousFocus.focus();
+    previousFocus = null;
+  }
+
+  // If cancelled, revert the checkbox
+  if (!completed && pendingAcquisition) {
+    const { trophyId, tier } = pendingAcquisition;
+    trackedStates[trophyId][tier] = false;
+
+    // Sync global state
+    window.trophyData = { trophies, trackedStates };
+
+    // Uncheck the checkbox in UI
+    const checkbox = document.querySelector(
+      `input[data-trophy-id="${trophyId}"][data-tier="${tier}"]`
+    );
+    if (checkbox) {
+      checkbox.checked = false;
+    }
+
+    // Revert in backend and update UI
+    window.electronAPI.saveTrophyState(trophyId, tier, false);
+    updateTotals();
+    updateDashboard();
+  }
+
+  pendingAcquisition = null;
+}
+
+// Complete acquisition with chosen method
+async function completeAcquisition(method) {
+  if (!pendingAcquisition) return;
+
+  const { trophyId, tier } = pendingAcquisition;
+  const counter = killCounters[trophyId] || { count: 0, milestones: [] };
+
+  try {
+    // Record milestone
+    const result = await window.electronAPI.recordMilestone(trophyId, tier, method, counter.count);
+
+    if (result.success) {
+      killCounters[trophyId] = result.counter;
+
+      // Refresh global stats
+      window.globalStats = await window.electronAPI.getGlobalStats();
+
+      // Sync global state
+      window.trophyData = { trophies, trackedStates };
+
+      // Close modal and refresh display
+      closeAcquisitionModal(true);
+      filterAndRender();
+      updateTotals();
+      updateDashboard();
+
+      const methodLabels = {
+        collected: 'Collected',
+        purchased: 'Purchased',
+        gambled: 'Gambled'
+      };
+      uiHelpers.showToast(
+        `${tier.charAt(0).toUpperCase() + tier.slice(1)} marked as ${methodLabels[method]}!`,
+        'success'
+      );
+    }
+  } catch (err) {
+    console.error('Failed to record milestone:', err);
+    uiHelpers.showToast('Failed to record acquisition', 'error');
+    closeAcquisitionModal(false);
+  }
+}
+
 // Handle checkbox state changes
-async function handleCheckboxChange(trophyId, tier, checked) {
+async function handleCheckboxChange(trophyId, tier, checked, trophy) {
   // Update local state
   if (!trackedStates[trophyId]) {
     trackedStates[trophyId] = { base: false, enchanted: false, golden: false };
   }
   trackedStates[trophyId][tier] = checked;
 
-  try {
-    const result = await window.electronAPI.saveTrophyState(trophyId, tier, checked);
-    if (!result?.success) {
-      throw new Error(result?.error || 'Save failed');
+  // Sync global state for other modules
+  window.trophyData = { trophies, trackedStates };
+
+  // If checking (obtaining), show acquisition modal
+  if (checked) {
+    try {
+      const result = await window.electronAPI.saveTrophyState(trophyId, tier, checked);
+      if (!result?.success) {
+        throw new Error(result?.error || 'Save failed');
+      }
+      // Show modal to ask how they got it
+      showAcquisitionModal(trophyId, tier, trophy);
+    } catch (err) {
+      console.error('Failed to save trophy state', err);
+      trackedStates[trophyId][tier] = false;
+      window.trophyData = { trophies, trackedStates };
+      uiHelpers.showToast('Could not save trophy change', 'error');
+      filterAndRender();
+      return;
     }
-  } catch (err) {
-    console.error('Failed to save trophy state', err);
-    trackedStates[trophyId][tier] = !checked; // revert local state
-    uiHelpers.showToast('Could not save trophy change', 'error');
-    filterAndRender();
-    return;
+  } else {
+    // Unchecking - remove milestone
+    try {
+      await window.electronAPI.saveTrophyState(trophyId, tier, checked);
+      await window.electronAPI.removeMilestone(trophyId, tier);
+
+      // Update local state
+      if (killCounters[trophyId]) {
+        killCounters[trophyId].milestones = killCounters[trophyId].milestones.filter(
+          (m) => m.tier !== tier
+        );
+      }
+
+      filterAndRender();
+    } catch (err) {
+      console.error('Failed to save trophy state', err);
+      trackedStates[trophyId][tier] = true;
+      window.trophyData = { trophies, trackedStates };
+      uiHelpers.showToast('Could not save trophy change', 'error');
+      filterAndRender();
+      return;
+    }
   }
 
   updateTotals();
+  updateDashboard();
 }
 
 // Render stat panel with 17 stat types
@@ -482,14 +1071,42 @@ function updateTotals() {
     }
   });
 
+  // Calculate max possible renown (if all tiers collected)
+  let maxRenown = 0;
+  trophies.forEach((trophy) => {
+    const availableTiers = trophy.tiers || ['Base', 'Golden', 'Enchanted'];
+    if (availableTiers.includes('Base')) maxRenown += 10;
+    if (availableTiers.includes('Golden')) maxRenown += 260;
+    if (availableTiers.includes('Enchanted')) maxRenown += 510;
+  });
+
   // Update tier counts - show only for trophies that have that tier
   document.getElementById('baseCount').textContent = `${baseCounted}/${baseTotalAvailable}`;
   document.getElementById('goldenCount').textContent = `${goldenCounted}/${goldenTotalAvailable}`;
   document.getElementById('enchantedCount').textContent =
     `${enchantedCounted}/${enchantedTotalAvailable}`;
 
+  // Update progress bars
+  const baseProgress = document.getElementById('baseProgress');
+  const goldenProgress = document.getElementById('goldenProgress');
+  const enchantedProgress = document.getElementById('enchantedProgress');
+
+  if (baseProgress) {
+    baseProgress.style.width = `${baseTotalAvailable > 0 ? (baseCounted / baseTotalAvailable) * 100 : 0}%`;
+  }
+  if (goldenProgress) {
+    goldenProgress.style.width = `${goldenTotalAvailable > 0 ? (goldenCounted / goldenTotalAvailable) * 100 : 0}%`;
+  }
+  if (enchantedProgress) {
+    enchantedProgress.style.width = `${enchantedTotalAvailable > 0 ? (enchantedCounted / enchantedTotalAvailable) * 100 : 0}%`;
+  }
+
   // Update renown and silver
   document.getElementById('totalRenown').textContent = totalRenownGained.toLocaleString();
+  const maxRenownEl = document.getElementById('trophyMaxRenown');
+  if (maxRenownEl) {
+    maxRenownEl.textContent = `/ ${maxRenown.toLocaleString()}`;
+  }
   document.getElementById('totalSilver').textContent = totalSilverSpent.toLocaleString();
 
   // Update stat bonuses
@@ -514,6 +1131,7 @@ async function updateDashboard() {
   let cosmeticCollected = 0;
   let cosmeticTotal = 0;
   let cosmeticRenown = 0;
+  let cosmeticMaxRenown = 0;
 
   try {
     const cosmeticStateData = (await window.electronAPI.getCosmeticsState()) || {};
@@ -533,6 +1151,9 @@ async function updateDashboard() {
       }
       return sum;
     }, 0);
+
+    // Calculate max cosmetic renown
+    cosmeticMaxRenown = cosmeticItems.reduce((sum, item) => sum + (item.renown || 0), 0);
   } catch (err) {
     console.error('Failed to load cosmetic data for dashboard', err);
   }
@@ -553,13 +1174,29 @@ async function updateDashboard() {
       10
     ) || 0;
 
+  // Trophy max renown from stat panel
+  const trophyMaxRenown =
+    parseInt(
+      (document.getElementById('trophyMaxRenown')?.textContent || '0')
+        .replace('/', '')
+        .replaceAll(',', '')
+        .trim(),
+      10
+    ) || 0;
+
   const totalRenown = cosmeticRenown + trophyRenown;
+  const totalMaxRenown = cosmeticMaxRenown + trophyMaxRenown;
 
   document.getElementById('trophyProgress').textContent = `${trophyPct}%`;
   document.getElementById('trophyCount').textContent = `${trophyCollected}/${trophyTotal}`;
   document.getElementById('cosmeticProgress').textContent = `${cosmeticPct}%`;
   document.getElementById('cosmeticCount').textContent = `${cosmeticCollected}/${cosmeticTotal}`;
   document.getElementById('renownTotal').textContent = totalRenown.toLocaleString();
+
+  const renownMaxEl = document.getElementById('renownMax');
+  if (renownMaxEl) {
+    renownMaxEl.textContent = `${totalRenown.toLocaleString()}/${totalMaxRenown.toLocaleString()}`;
+  }
 }
 
 // Make updateDashboard globally available

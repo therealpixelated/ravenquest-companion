@@ -16,8 +16,38 @@
       <div class="loading-text">Loading data...</div>
     </div>
     <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+    
+    <!-- Settings Overlay -->
+    <div id="settingsOverlay" class="settings-overlay"></div>
+    
+    <!-- Acquisition Method Modal -->
+    <div id="acquisitionModal" class="modal-overlay">
+      <div class="modal-panel">
+        <div class="modal-header">How did you get this?</div>
+        <div class="modal-content">
+          <button class="modal-option" data-method="collected">
+            <span class="modal-icon">🎯</span>
+            <span class="modal-label">Collected</span>
+            <span class="modal-desc">Dropped from mobs/bosses</span>
+          </button>
+          <button class="modal-option" data-method="purchased">
+            <span class="modal-icon">💰</span>
+            <span class="modal-label">Purchased</span>
+            <span class="modal-desc">Bought from marketplace</span>
+          </button>
+          <button class="modal-option" data-method="gambled">
+            <span class="modal-icon">🎰</span>
+            <span class="modal-label">Gambled</span>
+            <span class="modal-desc">Aether Shard gambling</span>
+          </button>
+        </div>
+        <button class="modal-cancel" id="acquisitionCancel">Cancel</button>
+      </div>
+    </div>
+    
     <div class="app">
       <div class="top-nav drag-region" role="tablist" aria-label="Primary Tabs">
+        <span class="compact-title">RQ Companion</span>
         <button
           id="trophies-tab"
           class="tab-button active"
@@ -26,7 +56,7 @@
           aria-controls="tab-trophies"
           data-tab="trophies"
         >
-          Trophies
+          🏆 Trophies
         </button>
         <button
           id="cosmetics-tab"
@@ -36,14 +66,26 @@
           aria-controls="tab-cosmetics"
           data-tab="cosmetics"
         >
-          Cosmetics
+          👗 Cosmetics
         </button>
         <div class="spacer"></div>
         <div class="opacity-control no-drag" aria-label="Overlay opacity">
           <label for="opacitySlider">Opacity</label>
-          <input id="opacitySlider" type="range" min="20" max="100" value="90" />
+          <input id="opacitySlider" type="range" min="20" max="100" value="100" />
         </div>
+        <button class="settings-btn no-drag" id="settingsBtn" title="Settings" aria-label="Open settings">
+          ⚙
+        </button>
       </div>
+      
+      <!-- Compact Mode Content (hidden in full mode) -->
+      <div class="compact-content">
+        <div class="compact-stats"></div>
+        <div class="compact-targets"></div>
+      </div>
+      
+      <!-- Compact Bar Content (hidden in other modes) -->
+      <div class="compact-bar-content"></div>
 
       <div class="dashboard-header" aria-label="Collection summary">
         <div class="stat-group">
@@ -60,6 +102,7 @@
           <div class="stat">
             <span class="stat-label">Total Renown</span>
             <span class="stat-value" id="renownTotal">0</span>
+            <span class="stat-detail" id="renownMax">0/0</span>
           </div>
         </div>
       </div>
@@ -73,9 +116,6 @@
         <div class="container">
           <div class="trophy-list">
             <h1>Trophy Collection</h1>
-            <div class="toolbar">
-              <button id="reloadDataBtn" class="primary-btn">Reload Data</button>
-            </div>
 
             <div class="trophy-sub-tabs" role="tablist" aria-label="Trophy Types">
               <button
@@ -125,20 +165,20 @@
               <div class="filter-group">
                 <label for="statusFilter">Collection Status:</label>
                 <select id="statusFilter" aria-label="Filter by collection status">
-                  <option value="">All</option>
-                  <option value="all-tiers">All Tiers</option>
-                  <option value="partial">Partial</option>
+                  <option value="">Show All</option>
+                  <option value="all-tiers">Complete (3/3)</option>
+                  <option value="partial">In Progress</option>
                   <option value="base-only">Base Only</option>
-                  <option value="none">Not Collected</option>
+                  <option value="none">Uncollected</option>
                 </select>
               </div>
               <div class="filter-group">
-                <label for="tierFilter">Trophy Tier:</label>
+                <label for="tierFilter">Tier Collected:</label>
                 <select id="tierFilter" aria-label="Filter by trophy tier">
                   <option value="">All Tiers</option>
-                  <option value="Base">Base</option>
-                  <option value="Golden">Golden</option>
-                  <option value="Enchanted">Enchanted</option>
+                  <option value="Base">Has Base</option>
+                  <option value="Golden">Has Golden</option>
+                  <option value="Enchanted">Has Enchanted</option>
                 </select>
               </div>
               <div class="filter-group" id="categoryFilterGroup">
@@ -155,6 +195,7 @@
                 </select>
               </div>
             </div>
+            <div id="resultsCount" class="results-count" aria-live="polite"></div>
             <div id="trophyListContainer" class="trophy-items"></div>
           </div>
           <div class="stat-panel">
@@ -164,14 +205,17 @@
               <div class="tier-count">
                 <span class="tier-label base">Base:</span>
                 <span id="baseCount">0/46</span>
+                <div class="tier-progress"><div class="tier-progress-bar base" id="baseProgress"></div></div>
               </div>
               <div class="tier-count">
                 <span class="tier-label golden">Golden:</span>
                 <span id="goldenCount">0/46</span>
+                <div class="tier-progress"><div class="tier-progress-bar golden" id="goldenProgress"></div></div>
               </div>
               <div class="tier-count">
                 <span class="tier-label enchanted">Enchanted:</span>
                 <span id="enchantedCount">0/46</span>
+                <div class="tier-progress"><div class="tier-progress-bar enchanted" id="enchantedProgress"></div></div>
               </div>
             </div>
             <div class="rewards-totals">
@@ -179,6 +223,7 @@
               <div class="reward-row">
                 <span class="reward-label">Renown Gained:</span>
                 <span id="totalRenown">0</span>
+                <span id="trophyMaxRenown" class="max-renown"></span>
               </div>
               <div class="reward-row">
                 <span class="reward-label">Silver Spent:</span>
@@ -252,6 +297,13 @@
               <div class="reward-row">
                 <span class="reward-label">Total Renown:</span>
                 <span id="cosmeticRenownTotal">0</span>
+                <span id="cosmeticMaxRenown" class="max-renown"></span>
+              </div>
+            </div>
+            <div class="category-breakdown">
+              <h3>Categories</h3>
+              <div id="categoryBreakdownContainer">
+                <!-- Dynamically populated by JavaScript -->
               </div>
             </div>
           </div>
@@ -261,5 +313,6 @@
     <script src="tabs.js"></script>
     <script src="trophies.js"></script>
     <script src="cosmetics.js"></script>
+    <script src="settings.js"></script>
   </body>
 </html>

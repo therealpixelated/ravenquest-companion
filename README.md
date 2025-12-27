@@ -1,32 +1,95 @@
 # RavenQuest Companion
 
-Version: 1.2.0  
-Last updated: December 2025
+<p align="center">
+  <img src="assets/icon.jpg" alt="RavenQuest Companion" width="128">
+</p>
 
-Windows companion app for tracking RavenQuest cosmetics and trophies. Electron + context isolation, local JSON data, electron-store persistence.
+<p align="center">
+  <strong>Track your trophies, cosmetics, and progress in RavenQuest</strong>
+</p>
 
-## Features
+<p align="center">
+  Version: 1.4.0 | Windows Desktop App | Electron
+</p>
 
-- Trophy tracker (creature/ocean/carnival/monuments) with tier states and stat totals
-- Cosmetics tracker with per-material counts and collected flag
-- Loading/toast feedback, basic ARIA/keyboard support
-- Overlay window: frameless, transparent, always-on-top with global toggle `Ctrl+Alt+F12`
-- Local persistence via electron-store; offline friendly
+---
 
-## Quick start
+## ✨ Features
+
+### 🏆 Trophy Tracking
+Track all trophy types with three collection tiers (Base, Golden, Enchanted):
+
+- **Creature Trophies** - Hunt creatures and track your kills
+- **Ocean Trophies** - Sea monster hunting progress
+- **Monuments** - Boss kills with shared counter
+- **Carnival Trophies** - Wheel spins and gambling stats
+
+![Trophy Tracker](docs/screenshots/01-trophies-full.png)
+
+### 📊 Kill Counters & Milestones
+- Track kills per trophy type
+- Record how you acquired each tier (Collected, Purchased, Gambled)
+- Milestone history preserved even after counter resets
+
+### 🎭 Cosmetics Tracking
+Track 695+ cosmetic items across categories:
+- Outfits, Mounts, Weapon Shines, Teleports, and more
+- Category-by-category renown breakdown
+- Progress toward max renown
+
+![Cosmetics Tracker](docs/screenshots/05-cosmetics-full.png)
+
+### 🔍 Powerful Filtering
+Find what you're looking for quickly:
+
+| Filter Type | Options |
+|-------------|---------|
+| **Search** | Filter by name |
+| **Status** | All, Complete, Partial, Uncollected |
+| **Tier** | Base, Golden, Enchanted collected |
+| **Category** | Trophy type or cosmetic category |
+
+![Search Results](docs/screenshots/08-search-results.png)
+
+### ⚙️ Multiple View Modes
+Adapt the app to your playstyle:
+
+| Mode | Description | Screenshot |
+|------|-------------|------------|
+| **Full View** | Complete tracking interface | ![Full](docs/screenshots/full-trophies.png) |
+| **Compact Sidebar** | Slim sidebar with stats & targets | ![Sidebar](docs/screenshots/compact-sidebar.png) |
+| **Minimal Bar** | Tiny horizontal stats bar | ![Bar](docs/screenshots/compact-bar.png) |
+| **Floating Tracker** | Small moveable checklist | ![Float](docs/screenshots/compact-floating.png) |
+
+**Settings Window** (separate popup):
+![Settings](docs/screenshots/settings-open.png)
+
+### 📈 Dashboard Stats
+Real-time progress in the top bar:
+- Trophy completion percentage
+- Cosmetic collection progress  
+- Total renown earned vs maximum
+
+### 🔒 Data Management
+- Local persistence (works offline)
+- Reset counters only or full progress reset
+- Data stored via electron-store
+
+![Data Management](docs/screenshots/07-settings-reset.png)
+
+---
+
+## 🚀 Quick Start
 
 ```bash
+# Install dependencies
 npm install
+
+# Run the app
 npm start
 ```
 
-Run tests:
-
-```bash
-npm test
-```
-
-Build (Windows):
+### Build for Windows
 
 ```bash
 npm run build
@@ -34,44 +97,162 @@ npm run build
 
 Output goes to `dist/`.
 
-Requires Electron 32.x (installed via npm).
+---
 
-Regenerate icon (prebuild):
+## 🎮 Hotkeys
 
-```bash
-npm run prebuild:icon
+| Hotkey | Action |
+|--------|--------|
+| `Ctrl+Alt+F12` | Toggle overlay visibility |
+
+Configurable in Settings panel.
+
+---
+
+## 📸 Screenshots Gallery
+
+<details>
+<summary>Click to expand all screenshots</summary>
+
+### Trophy Categories
+
+**Creature Trophies**
+![Trophies](docs/screenshots/01-trophies-full.png)
+
+**Ocean Trophies**
+![Ocean](docs/screenshots/02-ocean-trophies.png)
+
+**Monuments (Shared Boss Counter)**
+![Monuments](docs/screenshots/03-monuments.png)
+
+**Carnival Trophies**
+![Carnival](docs/screenshots/04-carnival-trophies.png)
+
+### Cosmetics
+
+**Full Cosmetics View**
+![Cosmetics](docs/screenshots/05-cosmetics-full.png)
+
+**Mounts Category**
+![Mounts](docs/screenshots/13-cosmetics-mounts.png)
+
+**Outfits Category**
+![Outfits](docs/screenshots/14-cosmetics-outfits.png)
+
+### Filtering
+
+**Completed Trophies**
+![Complete](docs/screenshots/09-filter-complete.png)
+
+**Partially Collected**
+![Partial](docs/screenshots/10-filter-partial.png)
+
+**Uncollected**
+![Uncollected](docs/screenshots/11-filter-uncollected.png)
+
+**Filter by Tier**
+![Tier Filter](docs/screenshots/12-filter-tier.png)
+
+### View Modes
+
+**Full View - Trophies**
+![Full Trophies](docs/screenshots/full-trophies.png)
+
+**Full View - Cosmetics**
+![Full Cosmetics](docs/screenshots/full-cosmetics.png)
+
+**Compact Sidebar**
+![Compact Sidebar](docs/screenshots/compact-sidebar.png)
+
+**Floating Tracker**
+![Floating](docs/screenshots/compact-floating.png)
+
+**Minimal Bar**
+![Minimal Bar](docs/screenshots/compact-bar.png)
+
+**Settings Window**
+![Settings](docs/screenshots/settings-open.png)
+
+</details>
+
+---
+
+## 🗂️ Project Structure
+
+```
+ravenquest-companion/
+├── main.js           # Electron main process
+├── preload.js        # Context bridge
+├── package.json
+├── assets/           # Icons and images
+├── data/             # JSON datasets
+│   ├── cosmetics.json
+│   ├── creature-trophies.json
+│   ├── ocean-trophies.json
+│   ├── aether-trophies.json
+│   └── carnival-trophies.json
+├── renderer/         # UI files
+│   ├── index.html
+│   ├── styles.css
+│   ├── tabs.js
+│   ├── trophies.js
+│   ├── cosmetics.js
+│   └── settings.js
+├── src/              # Utilities
+│   ├── timeUtils.js
+│   ├── dataValidation.js
+│   └── ipcValidation.js
+├── tests/            # Jest tests
+└── docs/             # Documentation & screenshots
 ```
 
-## Project layout
+---
 
-- data/… JSON datasets (cosmetics, creature/ocean/carnival/aether trophies)
-- renderer/… HTML/CSS/JS for UI
-- src/timeUtils.js, src/dataValidation.js, src/ipcValidation.js
-- tests/… Jest + data checks
-- main.js, preload.js, package.json
+## 🧪 Testing
 
-## Hotkeys
+```bash
+# Run all tests
+npm test
 
-- Show/hide: `Ctrl+Alt+F12`
+# Run linter
+npm run lint
+```
 
-## Icon regeneration
+---
 
-If you update `assets/icon.jpg`, regenerate `icon.ico` (multi-size) with ImageMagick:
+## 🔧 Development
+
+### Requirements
+- Node.js 18+
+- Windows 10/11
+
+### Icon Regeneration
+If you update `assets/icon.jpg`:
 
 ```powershell
 cd assets
-"C:\Program Files\ImageMagick-7.1.2-Q16-HDRI\magick.exe" convert icon.jpg -define icon:auto-resize="16,24,32,48,64,128,256" icon.ico
+magick convert icon.jpg -define icon:auto-resize="16,24,32,48,64,128,256" icon.ico
 ```
 
-## Troubleshooting
+### Capture Screenshots
+```bash
+npx electron scripts/capture-screenshots.js
+```
 
-- Ensure Node.js is installed and `npm install` completed.
-- If tray icon is missing, verify `assets/icon.ico` exists.
+---
 
-## License
+## 📝 Changelog
+
+See [CHANGELOG.md](CHANGELOG.md) for version history.
+
+---
+
+## 📄 License
 
 See [LICENSE](LICENSE).
 
-## Changelog
+---
 
-See [CHANGELOG.md](CHANGELOG.md).
+<p align="center">
+  Made for the RavenQuest community 🎮
+</p>
