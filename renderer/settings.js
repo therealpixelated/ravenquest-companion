@@ -140,15 +140,6 @@ function renderSettingsPanel() {
                 <div class="layout-desc">Slim sidebar with stats & targets</div>
               </div>
             </div>
-            
-            <div class="layout-option ${settings.viewMode === 'compact-floating' ? 'active' : ''}">
-              <input type="radio" name="viewMode" value="compact-floating" ${settings.viewMode === 'compact-floating' ? 'checked' : ''}>
-              <span class="layout-radio"></span>
-              <div>
-                <div class="layout-label">Floating Tracker</div>
-                <div class="layout-desc">Small moveable checklist</div>
-              </div>
-            </div>
           </div>
         </div>
         

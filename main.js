@@ -282,12 +282,6 @@ function createTray() {
             type: 'radio',
             checked: currentMode() === 'compact-sidebar',
             click: () => setViewModeFromTray('compact-sidebar')
-          },
-          {
-            label: 'Floating Tracker',
-            type: 'radio',
-            checked: currentMode() === 'compact-floating',
-            click: () => setViewModeFromTray('compact-floating')
           }
         ]
       },
@@ -334,17 +328,6 @@ function setViewModeFromTray(mode) {
         mainWindow.setResizable(true);
         mainWindow.setMinimumSize(180, 300);
         mainWindow.setPosition(primary.width - 240, 100);
-        break;
-      case 'compact-bar':
-        mainWindow.setSize(380, 42);
-        mainWindow.setResizable(false);
-        mainWindow.setPosition(Math.floor(primary.width / 2 - 190), 10);
-        break;
-      case 'compact-floating':
-        mainWindow.setSize(160, 240);
-        mainWindow.setResizable(true);
-        mainWindow.setMinimumSize(140, 180);
-        mainWindow.setPosition(primary.width - 180, 100);
         break;
       default:
         break;
@@ -531,7 +514,7 @@ ipcMain.handle('set-hotkey', (event, accelerator) => {
 ipcMain.handle('get-view-mode', () => store.get('view-mode', 'full'));
 
 ipcMain.handle('set-view-mode', (event, mode) => {
-  const validModes = ['full', 'compact-sidebar', 'compact-floating'];
+  const validModes = ['full', 'compact-sidebar'];
   if (!validModes.includes(mode)) {
     return { success: false, error: 'Invalid view mode' };
   }
@@ -555,12 +538,6 @@ ipcMain.handle('set-view-mode', (event, mode) => {
         mainWindow.setResizable(true);
         mainWindow.setMinimumSize(180, 300);
         mainWindow.setPosition(primary.width - 240, 100);
-        break;
-      case 'compact-floating':
-        mainWindow.setSize(160, 240);
-        mainWindow.setResizable(true);
-        mainWindow.setMinimumSize(140, 180);
-        mainWindow.setPosition(primary.width - 180, 100);
         break;
       default:
         // Already validated, this shouldn't happen
@@ -603,12 +580,6 @@ ipcMain.handle('show-context-menu', () => {
       type: 'radio',
       checked: currentMode === 'compact-sidebar',
       click: () => setViewModeFromTray('compact-sidebar')
-    },
-    {
-      label: 'Floating Tracker',
-      type: 'radio',
-      checked: currentMode === 'compact-floating',
-      click: () => setViewModeFromTray('compact-floating')
     },
     { type: 'separator' },
     {

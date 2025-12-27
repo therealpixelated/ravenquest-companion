@@ -103,13 +103,4 @@ test.describe('Feature Tests with Screenshots', () => {
     expect(targetsHeader).toBeTruthy();
     await window.screenshot({ path: `${SCREENSHOT_DIR}/compact-targets.png` });
   });
-
-  test('Floating Tracker Mode', async () => {
-    await window.evaluate(() => window.electronAPI.setViewMode('compact-floating'));
-    await window.waitForTimeout(500);
-    await window.screenshot({ path: `${SCREENSHOT_DIR}/compact-floating.png` });
-
-    // Reset
-    await window.evaluate(() => window.electronAPI.setViewMode('full'));
-  });
 });

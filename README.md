@@ -160,9 +160,6 @@ Configurable in Settings panel.
 **Compact Sidebar**
 ![Compact Sidebar](docs/screenshots/compact-sidebar.png)
 
-**Floating Tracker**
-![Floating](docs/screenshots/compact-floating.png)
-
 **Settings Window**
 ![Settings](docs/screenshots/settings-open.png)
 
