@@ -1,7 +1,7 @@
 # RavenQuest Companion
 
 <p align="center">
-  <img src="assets/icon.jpg" alt="RavenQuest Companion" width="128">
+  <img src="assets/icon.ico" alt="RavenQuest Companion" width="128">
 </p>
 
 <p align="center">
@@ -62,7 +62,7 @@ Adapt the app to your playstyle:
 | **Floating Tracker** | Small moveable checklist | ![Float](docs/screenshots/compact-floating.png) |
 
 **Settings Window** (separate popup):
-![Settings](docs/screenshots/settings-open.png)
+![Settings](docs/screenshots/06-settings-panel.png)
 
 ### 📈 Dashboard Stats
 Real-time progress in the top bar:
