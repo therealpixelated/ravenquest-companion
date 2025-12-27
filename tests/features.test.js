@@ -65,10 +65,10 @@ describe('Active Targets Feature', () => {
 });
 
 describe('View Mode Feature', () => {
-  const validModes = ['full', 'compact-sidebar', 'compact-bar', 'compact-floating'];
+  const validModes = ['full', 'compact-sidebar', 'compact-floating'];
 
-  test('should have 4 valid view modes', () => {
-    expect(validModes).toHaveLength(4);
+  test('should have 3 valid view modes', () => {
+    expect(validModes).toHaveLength(3);
   });
 
   test('should validate view mode correctly', () => {

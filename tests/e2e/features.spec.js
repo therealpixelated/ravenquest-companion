@@ -39,14 +39,14 @@ test.describe('Feature Tests with Screenshots', () => {
     // Settings now opens as separate window
     await window.evaluate(() => window.electronAPI.openSettingsWindow());
     await window.waitForTimeout(800);
-    
+
     // Get all windows - settings should be second window
     const windows = await app.windows();
     expect(windows.length).toBeGreaterThanOrEqual(1);
-    
+
     // Take screenshot of main window (settings is separate)
     await window.screenshot({ path: `${SCREENSHOT_DIR}/settings-open.png` });
-    
+
     // Close settings window
     await window.evaluate(() => window.electronAPI.closeSettingsWindow());
     await window.waitForTimeout(200);
@@ -108,15 +108,6 @@ test.describe('Feature Tests with Screenshots', () => {
     await window.evaluate(() => window.electronAPI.setViewMode('compact-floating'));
     await window.waitForTimeout(500);
     await window.screenshot({ path: `${SCREENSHOT_DIR}/compact-floating.png` });
-
-    // Reset
-    await window.evaluate(() => window.electronAPI.setViewMode('full'));
-  });
-
-  test('Minimal Bar Mode', async () => {
-    await window.evaluate(() => window.electronAPI.setViewMode('compact-bar'));
-    await window.waitForTimeout(500);
-    await window.screenshot({ path: `${SCREENSHOT_DIR}/compact-bar.png` });
 
     // Reset
     await window.evaluate(() => window.electronAPI.setViewMode('full'));

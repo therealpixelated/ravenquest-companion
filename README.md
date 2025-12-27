@@ -58,7 +58,7 @@ Adapt the app to your playstyle:
 |------|-------------|------------|
 | **Full View** | Complete tracking interface | ![Full](docs/screenshots/full-trophies.png) |
 | **Compact Sidebar** | Slim sidebar with stats & targets | ![Sidebar](docs/screenshots/compact-sidebar.png) |
-| **Minimal Bar** | Tiny horizontal stats bar | ![Bar](docs/screenshots/compact-bar.png) |
+
 | **Floating Tracker** | Small moveable checklist | ![Float](docs/screenshots/compact-floating.png) |
 
 **Settings Window** (separate popup):
@@ -166,9 +166,6 @@ Configurable in Settings panel.
 
 **Floating Tracker**
 ![Floating](docs/screenshots/compact-floating.png)
-
-**Minimal Bar**
-![Minimal Bar](docs/screenshots/compact-bar.png)
 
 **Settings Window**
 ![Settings](docs/screenshots/settings-open.png)

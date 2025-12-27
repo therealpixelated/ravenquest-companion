@@ -141,15 +141,6 @@ function renderSettingsPanel() {
               </div>
             </div>
             
-            <div class="layout-option ${settings.viewMode === 'compact-bar' ? 'active' : ''}">
-              <input type="radio" name="viewMode" value="compact-bar" ${settings.viewMode === 'compact-bar' ? 'checked' : ''}>
-              <span class="layout-radio"></span>
-              <div>
-                <div class="layout-label">Minimal Bar</div>
-                <div class="layout-desc">Tiny horizontal bar with totals</div>
-              </div>
-            </div>
-            
             <div class="layout-option ${settings.viewMode === 'compact-floating' ? 'active' : ''}">
               <input type="radio" name="viewMode" value="compact-floating" ${settings.viewMode === 'compact-floating' ? 'checked' : ''}>
               <span class="layout-radio"></span>
